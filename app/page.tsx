@@ -1,19 +1,9 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { useProvider, useSigner } from "wagmi";
+import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain } from "wagmi";
 import { base, mainnet, arbitrum, optimism, polygon } from "wagmi/chains";
-import { parseUnits, formatUnits, Address, erc20Abi } from "viem";
+import { Address } from "viem";
 import styles from "./page.module.css";
-
-// Uniswap Router V3 addresses for different chains
-const UNISWAP_ROUTER: Record<number, Address> = {
-  [mainnet.id]: "0xE592427A0AEce92De3Edee1F18E0157C05861564" as Address,
-  [base.id]: "0x2626664c2603336E57B271c5C0b26F421741e481" as Address,
-  [arbitrum.id]: "0xE592427A0AEce92De3Edee1F18E0157C05861564" as Address,
-  [optimism.id]: "0xE592427A0AEce92De3Edee1F18E0157C05861564" as Address,
-  [polygon.id]: "0xE592427A0AEce92De3Edee1F18E0157C05861564" as Address,
-};
 
 // Common token addresses
 const TOKEN_ADDRESSES: Record<number, Record<string, Address>> = {
@@ -47,8 +37,6 @@ export default function Home() {
   const { switchChain } = useSwitchChain();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-  const provider = useProvider();
-  const { data: signer } = useSigner();
   const [fromToken, setFromToken] = useState("ETH");
   const [toToken, setToToken] = useState("USDC");
   const [fromAmount, setFromAmount] = useState("");
@@ -56,9 +44,6 @@ export default function Home() {
   const [selectedChain, setSelectedChain] = useState(CHAINS[0]);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
-
-  const { writeContract, data: hash, isPending, error: writeError } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
   // Get available tokens for current chain
   const availableTokens = useMemo(() => {
@@ -96,10 +81,6 @@ export default function Home() {
 
       setIsLoadingQuote(true);
       try {
-        // Use Uniswap API to get quote
-        const fromAddress = availableTokens[fromToken] || availableTokens.ETH;
-        const toAddress = availableTokens[toToken] || availableTokens.USDC;
-        
         // For demo, using approximate rate (in production, use Uniswap API)
         const rate = fromToken === "ETH" && toToken === "USDC" ? 2500 : 
                      fromToken === "USDC" && toToken === "ETH" ? 0.0004 :
@@ -276,24 +257,8 @@ export default function Home() {
             ? "Connect Wallet to Swap" 
             : chainId !== selectedChain.id 
             ? `Switch to ${selectedChain.name}` 
-            : isPending || isConfirming
-            ? "Processing..."
             : "Swap on Uniswap"}
         </button>
-
-        {isSuccess && hash && (
-          <div className={styles.successBox}>
-            <p>✅ Swap successful!</p>
-            <a
-              href={`https://basescan.org/tx/${hash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.link}
-            >
-              View on Explorer
-            </a>
-          </div>
-        )}
 
         <div className={styles.infoBox}>
           <p>💡 This will open Uniswap in a new tab to complete your swap</p>
