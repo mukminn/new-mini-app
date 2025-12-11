@@ -2,6 +2,7 @@
   :root {
     --background: #ffffff;
     --foreground: #171717;
+    --color-blue-500: rgb(59, 130, 246);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -56,5 +57,14 @@
     html {
       color-scheme: dark;
     }
+  }
+
+  nextjs-portal {
+    left: 77px;
+    top: -34px;
+    color: transparent;
+    background-image: linear-gradient(90deg, rgba(0, 0, 0, 1) 3%, rgba(255, 255, 255, 1) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
   }
 }
