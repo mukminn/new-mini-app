@@ -1,117 +1,94 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useMiniKit } from "@coinbase/onchainkit/minikit";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
-import Link from "next/link";
+import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain } from "wagmi";
+import { base, mainnet, arbitrum, optimism, polygon } from "wagmi/chains";
 import styles from "./page.module.css";
 
-interface Accomplishment {
-  id: string;
-  text: string;
-  emoji: string;
-  createdAt: number;
-}
+// Popular tokens across all chains
+const TOKENS = {
+  ETH: { symbol: "ETH", name: "Ethereum", address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+  USDC: { symbol: "USDC", name: "USD Coin", address: "native", decimals: 6 },
+  USDT: { symbol: "USDT", name: "Tether USD", address: "native", decimals: 6 },
+  DAI: { symbol: "DAI", name: "Dai Stablecoin", address: "native", decimals: 18 },
+  WBTC: { symbol: "WBTC", name: "Wrapped Bitcoin", address: "native", decimals: 8 },
+  WETH: { symbol: "WETH", name: "Wrapped Ether", address: "native", decimals: 18 },
+};
 
-const EMOJI_OPTIONS = ["🎉", "🔥", "💪", "✨", "🚀", "⭐", "💯", "🎯", "🏆", "❤️"];
+const CHAINS = [
+  { id: base.id, name: "Base", url: "base" },
+  { id: mainnet.id, name: "Ethereum", url: "ethereum" },
+  { id: arbitrum.id, name: "Arbitrum", url: "arbitrum" },
+  { id: optimism.id, name: "Optimism", url: "optimism" },
+  { id: polygon.id, name: "Polygon", url: "polygon" },
+];
 
 export default function Home() {
-  const { isFrameReady, setFrameReady, context } = useMiniKit();
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-  const [accomplishments, setAccomplishments] = useState<Accomplishment[]>([]);
-  const [inputText, setInputText] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editText, setEditText] = useState("");
+  const [fromToken, setFromToken] = useState(TOKENS.ETH);
+  const [toToken, setToToken] = useState(TOKENS.USDC);
+  const [fromAmount, setFromAmount] = useState("");
+  const [toAmount, setToAmount] = useState("");
+  const [selectedChain, setSelectedChain] = useState(CHAINS[0]);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Initialize the miniapp
-  useEffect(() => {
-    if (!isFrameReady) {
-      setFrameReady();
-    }
-  }, [setFrameReady, isFrameReady]);
-
-  // Load dark mode preference from localStorage
+  // Load dark mode preference
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");
     if (savedDarkMode !== null) {
       setIsDarkMode(savedDarkMode === "true");
       document.documentElement.classList.toggle("dark", savedDarkMode === "true");
     } else {
-      // Check system preference
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       setIsDarkMode(prefersDark);
       document.documentElement.classList.toggle("dark", prefersDark);
     }
   }, []);
 
-  // Load accomplishments from localStorage
+  // Calculate swap amount (simplified - in production use Uniswap API)
   useEffect(() => {
-    const saved = localStorage.getItem("accomplishments");
-    if (saved) {
-      try {
-        setAccomplishments(JSON.parse(saved));
-      } catch (e) {
-        console.error("Error loading accomplishments:", e);
-      }
+    if (fromAmount && parseFloat(fromAmount) > 0) {
+      const rate = fromToken.symbol === "ETH" && toToken.symbol === "USDC" ? 2500 : 
+                   fromToken.symbol === "USDC" && toToken.symbol === "ETH" ? 0.0004 :
+                   fromToken.symbol === "USDT" && toToken.symbol === "USDC" ? 1 : 1;
+      const calculated = (parseFloat(fromAmount) * rate).toFixed(6);
+      setToAmount(calculated);
+    } else {
+      setToAmount("");
     }
-  }, []);
+  }, [fromAmount, fromToken, toToken]);
 
-  // Save accomplishments to localStorage
-  useEffect(() => {
-    if (accomplishments.length > 0 || localStorage.getItem("accomplishments")) {
-      localStorage.setItem("accomplishments", JSON.stringify(accomplishments));
+  const handleSwap = () => {
+    if (!isConnected) {
+      connect({ connector: connectors[0] });
+      return;
     }
-  }, [accomplishments]);
 
-  const handleAdd = () => {
-    if (!inputText.trim()) return;
-
-    const newAccomplishment: Accomplishment = {
-      id: Date.now().toString(),
-      text: inputText.trim(),
-      emoji: "✨",
-      createdAt: Date.now(),
-    };
-
-    setAccomplishments([newAccomplishment, ...accomplishments]);
-    setInputText("");
-  };
-
-  const handleEmojiChange = (id: string, emoji: string) => {
-    setAccomplishments(
-      accomplishments.map((acc) => (acc.id === id ? { ...acc, emoji } : acc))
-    );
-  };
-
-  const handleDelete = (id: string) => {
-    setAccomplishments(accomplishments.filter((acc) => acc.id !== id));
-  };
-
-  const handleEdit = (id: string) => {
-    const accomplishment = accomplishments.find((acc) => acc.id === id);
-    if (accomplishment) {
-      setEditingId(id);
-      setEditText(accomplishment.text);
+    if (!fromAmount || parseFloat(fromAmount) <= 0) {
+      return;
     }
+
+    // Switch chain if needed
+    if (chainId !== selectedChain.id) {
+      switchChain({ chainId: selectedChain.id });
+      return;
+    }
+
+    // Open Uniswap with pre-filled parameters
+    const fromAddress = fromToken.address === "0x0000000000000000000000000000000000000000" ? "ETH" : fromToken.address;
+    const toAddress = toToken.address === "0x0000000000000000000000000000000000000000" ? "ETH" : toToken.address;
+    const uniswapUrl = `https://app.uniswap.org/swap?chain=${selectedChain.url}&inputCurrency=${fromAddress}&outputCurrency=${toAddress}&amount=${fromAmount}`;
+    window.open(uniswapUrl, "_blank");
   };
 
-  const handleSaveEdit = (id: string) => {
-    if (!editText.trim()) return;
-
-    setAccomplishments(
-      accomplishments.map((acc) =>
-        acc.id === id ? { ...acc, text: editText.trim() } : acc
-      )
-    );
-    setEditingId(null);
-    setEditText("");
-  };
-
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setEditText("");
+  const swapTokens = () => {
+    setFromToken(toToken);
+    setToToken(fromToken);
+    setFromAmount(toAmount);
+    setToAmount(fromAmount);
   };
 
   const toggleDarkMode = () => {
@@ -123,147 +100,125 @@ export default function Home() {
 
   return (
     <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>
+      {/* Header */}
+      <div className={styles.header}>
+        <h1 className={styles.title}>Swap Tokens</h1>
+        <p className={styles.subtitle}>Trade any token on Uniswap</p>
+      </div>
+
+      {/* Wallet Section */}
       <div className={styles.walletSection}>
         {!isConnected ? (
-          <button 
-            onClick={() => connect({ connector: connectors[0] })}
-            className={styles.connectButton}
-          >
+          <button onClick={() => connect({ connector: connectors[0] })} className={styles.connectButton}>
             Connect Wallet
           </button>
         ) : (
           <>
             <div className={styles.walletInfo}>
-              <p>Connected: {address?.slice(0, 6)}...{address?.slice(-4)}</p>
+              <p>{address?.slice(0, 6)}...{address?.slice(-4)}</p>
             </div>
-            <button 
-              onClick={() => disconnect()}
-              className={styles.disconnectButton}
-            >
+            <button onClick={() => disconnect()} className={styles.disconnectButton}>
               Disconnect
             </button>
           </>
         )}
       </div>
-      <button 
-        onClick={toggleDarkMode} 
-        className={styles.themeToggle}
-        title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-        aria-label="Toggle dark mode"
-      >
+
+      {/* Dark Mode Toggle */}
+      <button onClick={toggleDarkMode} className={styles.themeToggle} title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
         {isDarkMode ? "☀️" : "🌙"}
       </button>
-      {accomplishments.length === 0 && (
-        <div className={styles.emptyState}>
-          <p>No accomplishments yet. Start adding your wins! 🚀</p>
-        </div>
-      )}
-      <div className={styles.content}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>
-            What Did You Accomplish?
-          </h1>
-          <p className={styles.subtitle}>
-            Hey {context?.user?.displayName || "there"}! Track your wins and celebrate your progress 🎯
-          </p>
-          <Link href="/swap" className={styles.swapLink}>
-            💱 Swap Tokens on Uniswap
-          </Link>
-        </div>
 
+      {/* Chain Selection */}
+      <div className={styles.chainSection}>
+        <label className={styles.chainLabel}>Network</label>
+        <select
+          value={selectedChain.id}
+          onChange={(e) => {
+            const chain = CHAINS.find((c) => c.id === Number(e.target.value));
+            if (chain) setSelectedChain(chain);
+          }}
+          className={styles.chainSelect}
+        >
+          {CHAINS.map((chain) => (
+            <option key={chain.id} value={chain.id}>
+              {chain.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Swap Card */}
+      <div className={styles.swapCard}>
         <div className={styles.inputSection}>
-          <div className={styles.inputWrapper}>
+          <label className={styles.label}>From</label>
+          <div className={styles.tokenInput}>
             <input
-              type="text"
-              placeholder="What did you accomplish today?"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleAdd()}
-              className={styles.input}
+              type="number"
+              placeholder="0.0"
+              value={fromAmount}
+              onChange={(e) => setFromAmount(e.target.value)}
+              className={styles.amountInput}
             />
-            <button onClick={handleAdd} className={styles.addButton}>
-              Add
-            </button>
+            <select
+              value={fromToken.symbol}
+              onChange={(e) => {
+                const token = Object.values(TOKENS).find((t) => t.symbol === e.target.value);
+                if (token) setFromToken(token);
+              }}
+              className={styles.tokenSelect}
+            >
+              {Object.values(TOKENS).map((token) => (
+                <option key={token.symbol} value={token.symbol}>
+                  {token.symbol}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        <div className={styles.listSection}>
-          {accomplishments.length > 0 && (
-            <div className={styles.accomplishmentsList}>
-              {accomplishments.map((acc) => (
-                <div key={acc.id} className={styles.accomplishmentCard}>
-                  {editingId === acc.id ? (
-                    <div className={styles.editMode}>
-                      <input
-                        type="text"
-                        value={editText}
-                        onChange={(e) => setEditText(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === "Enter") handleSaveEdit(acc.id);
-                          if (e.key === "Escape") handleCancelEdit();
-                        }}
-                        className={styles.editInput}
-                        autoFocus
-                      />
-                      <div className={styles.editActions}>
-                        <button
-                          onClick={() => handleSaveEdit(acc.id)}
-                          className={styles.saveButton}
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          className={styles.cancelButton}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className={styles.cardContent}>
-                        <span className={styles.emojiDisplay}>{acc.emoji}</span>
-                        <p className={styles.accomplishmentText}>{acc.text}</p>
-                      </div>
-                      <div className={styles.cardActions}>
-                        <div className={styles.emojiSelector}>
-                          {EMOJI_OPTIONS.map((emoji) => (
-                            <button
-                              key={emoji}
-                              onClick={() => handleEmojiChange(acc.id, emoji)}
-                              className={`${styles.emojiButton} ${
-                                acc.emoji === emoji ? styles.emojiButtonActive : ""
-                              }`}
-                              title={`React with ${emoji}`}
-                            >
-                              {emoji}
-                            </button>
-                          ))}
-                        </div>
-                        <div className={styles.actionButtons}>
-                          <button
-                            onClick={() => handleEdit(acc.id)}
-                            className={styles.editButton}
-                            title="Edit"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            onClick={() => handleDelete(acc.id)}
-                            className={styles.deleteButton}
-                            title="Delete"
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
+        <button onClick={swapTokens} className={styles.swapButton} title="Swap tokens">
+          ⇅
+        </button>
+
+        <div className={styles.inputSection}>
+          <label className={styles.label}>To</label>
+          <div className={styles.tokenInput}>
+            <input
+              type="text"
+              placeholder="0.0"
+              value={toAmount}
+              readOnly
+              className={styles.amountInput}
+            />
+            <select
+              value={toToken.symbol}
+              onChange={(e) => {
+                const token = Object.values(TOKENS).find((t) => t.symbol === e.target.value);
+                if (token) setToToken(token);
+              }}
+              className={styles.tokenSelect}
+            >
+              {Object.values(TOKENS).map((token) => (
+                <option key={token.symbol} value={token.symbol}>
+                  {token.symbol}
+                </option>
               ))}
-            </div>
-          )}
+            </select>
+          </div>
+        </div>
+
+        <button
+          onClick={handleSwap}
+          disabled={!fromAmount || parseFloat(fromAmount) <= 0}
+          className={styles.swapActionButton}
+        >
+          {!isConnected ? "Connect Wallet to Swap" : chainId !== selectedChain.id ? `Switch to ${selectedChain.name}` : "Swap on Uniswap"}
+        </button>
+
+        <div className={styles.infoBox}>
+          <p>💡 This will open Uniswap in a new tab to complete your swap</p>
+          <p>🔗 <a href={`https://app.uniswap.org/swap?chain=${selectedChain.url}`} target="_blank" rel="noopener noreferrer" className={styles.link}>Visit Uniswap directly</a></p>
         </div>
       </div>
     </div>
