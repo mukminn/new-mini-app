@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { parseUnits, formatUnits } from "viem";
+import { useAccount } from "wagmi";
 import { base } from "wagmi/chains";
 import styles from "./page.module.css";
 import Link from "next/link";
@@ -29,18 +28,13 @@ const TOKENS = {
 };
 
 export default function SwapPage() {
-  const { address, isConnected, chainId } = useAccount();
+  const { isConnected, chainId } = useAccount();
   const [fromToken, setFromToken] = useState(TOKENS.ETH);
   const [toToken, setToToken] = useState(TOKENS.USDC);
   const [fromAmount, setFromAmount] = useState("");
   const [toAmount, setToAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const { writeContract, data: hash, isPending, error: writeError } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash,
-  });
 
   // Fetch price quote from Uniswap (simplified - using mock rate)
   useEffect(() => {
@@ -187,21 +181,6 @@ export default function SwapPage() {
         </div>
       </div>
 
-      {isSuccess && (
-        <div className={styles.successBox}>
-          <p>✅ Transaction successful!</p>
-          {hash && (
-            <a
-              href={`https://basescan.org/tx/${hash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.link}
-            >
-              View on BaseScan
-            </a>
-          )}
-        </div>
-      )}
     </div>
   );
 }
