@@ -1,8 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
-import { ConnectWallet } from "@coinbase/onchainkit";
-import { useAccount } from "wagmi";
+import { useAccount, useConnect, useDisconnect } from "wagmi";
 import styles from "./page.module.css";
 
 interface Accomplishment {
@@ -17,6 +16,8 @@ const EMOJI_OPTIONS = ["🎉", "🔥", "💪", "✨", "🚀", "⭐", "💯", "�
 export default function Home() {
   const { isFrameReady, setFrameReady, context } = useMiniKit();
   const { address, isConnected } = useAccount();
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
   const [accomplishments, setAccomplishments] = useState<Accomplishment[]>([]);
   const [inputText, setInputText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -122,11 +123,25 @@ export default function Home() {
   return (
     <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>
       <div className={styles.walletSection}>
-        <ConnectWallet />
-        {isConnected && address && (
-          <div className={styles.walletInfo}>
-            <p>Connected: {address.slice(0, 6)}...{address.slice(-4)}</p>
-          </div>
+        {!isConnected ? (
+          <button 
+            onClick={() => connect({ connector: connectors[0] })}
+            className={styles.connectButton}
+          >
+            Connect Wallet
+          </button>
+        ) : (
+          <>
+            <div className={styles.walletInfo}>
+              <p>Connected: {address?.slice(0, 6)}...{address?.slice(-4)}</p>
+            </div>
+            <button 
+              onClick={() => disconnect()}
+              className={styles.disconnectButton}
+            >
+              Disconnect
+            </button>
+          </>
         )}
       </div>
       <button 
