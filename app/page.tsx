@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 interface Accomplishment {
@@ -165,6 +166,9 @@ export default function Home() {
           <p className={styles.subtitle}>
             Hey {context?.user?.displayName || "there"}! Track your wins and celebrate your progress 🎯
           </p>
+          <Link href="/swap" className={styles.swapLink}>
+            💱 Swap Tokens on Uniswap
+          </Link>
         </div>
 
         <div className={styles.inputSection}>
