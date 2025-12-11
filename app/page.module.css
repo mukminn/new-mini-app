@@ -13,6 +13,55 @@
   border-color: var(--color-blue-500);
 }
 
+.walletSection {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.walletInfo {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.themeToggle {
+  position: fixed;
+  top: 1.5rem;
+  left: 1.5rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.themeToggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+.themeToggle:active {
+  transform: scale(0.95);
+}
+
 .content {
   max-width: 700px;
   width: 100%;
@@ -312,6 +361,106 @@
 
 .cancelButton:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* Dark Mode Styles */
+.container.dark {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.container.dark .title {
+  background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.container.dark .subtitle {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.container.dark .emptyState {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.container.dark .input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.container.dark .input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.container.dark .inputWrapper {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.container.dark .accomplishmentCard {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.container.dark .accomplishmentCard:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.container.dark .accomplishmentText {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.container.dark .cardActions {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.container.dark .emojiButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.container.dark .emojiButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.container.dark .editButton,
+.container.dark .deleteButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.container.dark .editInput {
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.container.dark .editInput:focus {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.container.dark .cancelButton {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.container.dark .walletInfo {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.container.dark .themeToggle {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.container.dark .themeToggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 /* Mobile responsiveness */

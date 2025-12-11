@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import { ConnectWallet } from "@coinbase/onchainkit";
+import { useAccount } from "wagmi";
 import styles from "./page.module.css";
 
 interface Accomplishment {
@@ -14,10 +16,12 @@ const EMOJI_OPTIONS = ["🎉", "🔥", "💪", "✨", "🚀", "⭐", "💯", "�
 
 export default function Home() {
   const { isFrameReady, setFrameReady, context } = useMiniKit();
+  const { address, isConnected } = useAccount();
   const [accomplishments, setAccomplishments] = useState<Accomplishment[]>([]);
   const [inputText, setInputText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Initialize the miniapp
   useEffect(() => {
@@ -25,6 +29,20 @@ export default function Home() {
       setFrameReady();
     }
   }, [setFrameReady, isFrameReady]);
+
+  // Load dark mode preference from localStorage
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem("darkMode");
+    if (savedDarkMode !== null) {
+      setIsDarkMode(savedDarkMode === "true");
+      document.documentElement.classList.toggle("dark", savedDarkMode === "true");
+    } else {
+      // Check system preference
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setIsDarkMode(prefersDark);
+      document.documentElement.classList.toggle("dark", prefersDark);
+    }
+  }, []);
 
   // Load accomplishments from localStorage
   useEffect(() => {
@@ -94,8 +112,31 @@ export default function Home() {
     setEditText("");
   };
 
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem("darkMode", String(newDarkMode));
+    document.documentElement.classList.toggle("dark", newDarkMode);
+  };
+
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>
+      <div className={styles.walletSection}>
+        <ConnectWallet />
+        {isConnected && address && (
+          <div className={styles.walletInfo}>
+            <p>Connected: {address.slice(0, 6)}...{address.slice(-4)}</p>
+          </div>
+        )}
+      </div>
+      <button 
+        onClick={toggleDarkMode} 
+        className={styles.themeToggle}
+        title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        aria-label="Toggle dark mode"
+      >
+        {isDarkMode ? "☀️" : "🌙"}
+      </button>
       {accomplishments.length === 0 && (
         <div className={styles.emptyState}>
           <p>No accomplishments yet. Start adding your wins! 🚀</p>
