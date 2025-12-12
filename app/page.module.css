@@ -177,6 +177,23 @@
   font-weight: 500;
 }
 
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.balance {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+
+.balance:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .tokenInput {
   display: flex;
   gap: 0.5rem;
