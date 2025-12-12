@@ -56,9 +56,31 @@ export default function RootLayout({
           <script
             dangerouslySetInnerHTML={{
               __html: `
-                if (typeof window !== 'undefined') {
-                  window.__VERCEL_TOOLBAR__ = false;
-                }
+                (function() {
+                  if (typeof window !== 'undefined') {
+                    window.__VERCEL_TOOLBAR__ = false;
+                    // Prevent Vercel Toolbar from loading
+                    Object.defineProperty(window, '__VERCEL_TOOLBAR__', {
+                      value: false,
+                      writable: false,
+                      configurable: false
+                    });
+                    // Remove toolbar if already loaded
+                    if (document) {
+                      const removeToolbar = () => {
+                        const toolbar = document.querySelector('#vercel-live-feedback, [data-vercel-toolbar], iframe[src*="vercel.com/toolbar"]');
+                        if (toolbar) {
+                          toolbar.remove();
+                        }
+                      };
+                      removeToolbar();
+                      if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', removeToolbar);
+                      }
+                      setInterval(removeToolbar, 1000);
+                    }
+                  }
+                })();
               `,
             }}
           />

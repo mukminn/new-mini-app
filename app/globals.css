@@ -67,4 +67,20 @@
     background-clip: text;
     -webkit-background-clip: text;
   }
+
+  /* Hide Vercel Toolbar */
+  #vercel-live-feedback,
+  [data-vercel-toolbar],
+  iframe[src*="vercel.com/toolbar"],
+  iframe[src*="vercel-live"],
+  div[data-vercel-toolbar] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
 }

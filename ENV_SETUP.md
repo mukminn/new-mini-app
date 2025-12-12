@@ -52,3 +52,4 @@ Untuk production, tambahkan environment variables di Vercel Dashboard:
 - Jangan commit file .env.local ke repository
 - Gunakan Vercel Environment Variables untuk production
 
+

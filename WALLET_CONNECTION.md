@@ -46,3 +46,4 @@ Wallet connection dikonfigurasi di `app/rootProvider.tsx`:
 - Auto Connect: Enabled untuk Mini App
 - Wallet Display: Modal
 
+
