@@ -1,54 +1,8 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
-import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain, useWriteContract, useWaitForTransactionReceipt, useReadContract, useBalance } from "wagmi";
+import { useState, useEffect } from "react";
+import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain } from "wagmi";
 import { base, mainnet, arbitrum, optimism, polygon } from "wagmi/chains";
-import { parseUnits, Address, maxUint256 } from "viem";
-import { erc20Abi } from "viem";
 import styles from "./page.module.css";
-
-// Uniswap Universal Router V2
-const UNIVERSAL_ROUTER: Record<number, Address> = {
-  [mainnet.id]: "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD" as Address,
-  [base.id]: "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD" as Address,
-  [arbitrum.id]: "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD" as Address,
-  [optimism.id]: "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD" as Address,
-  [polygon.id]: "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD" as Address,
-};
-
-// Token info with decimals
-const TOKEN_INFO: Record<number, Record<string, { address: Address; decimals: number; symbol: string }>> = {
-  [mainnet.id]: {
-    ETH: { address: "0x0000000000000000000000000000000000000000" as Address, decimals: 18, symbol: "ETH" },
-    USDC: { address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" as Address, decimals: 6, symbol: "USDC" },
-    USDT: { address: "0xdAC17F958D2ee523a2206206994597C13D831ec7" as Address, decimals: 6, symbol: "USDT" },
-    DAI: { address: "0x6B175474E89094C44Da98b954EedeAC495271d0F" as Address, decimals: 18, symbol: "DAI" },
-    WBTC: { address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599" as Address, decimals: 8, symbol: "WBTC" },
-    WETH: { address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" as Address, decimals: 18, symbol: "WETH" },
-  },
-  [base.id]: {
-    ETH: { address: "0x0000000000000000000000000000000000000000" as Address, decimals: 18, symbol: "ETH" },
-    USDC: { address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" as Address, decimals: 6, symbol: "USDC" },
-    DAI: { address: "0x50c5725949A6F0c72E6C4a641F24049A917E0C6A" as Address, decimals: 18, symbol: "DAI" },
-    WETH: { address: "0x4200000000000000000000000000000000000006" as Address, decimals: 18, symbol: "WETH" },
-  },
-  [arbitrum.id]: {
-    ETH: { address: "0x0000000000000000000000000000000000000000" as Address, decimals: 18, symbol: "ETH" },
-    USDC: { address: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" as Address, decimals: 6, symbol: "USDC" },
-    USDT: { address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9" as Address, decimals: 6, symbol: "USDT" },
-    WETH: { address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1" as Address, decimals: 18, symbol: "WETH" },
-  },
-  [optimism.id]: {
-    ETH: { address: "0x0000000000000000000000000000000000000000" as Address, decimals: 18, symbol: "ETH" },
-    USDC: { address: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85" as Address, decimals: 6, symbol: "USDC" },
-    WETH: { address: "0x4200000000000000000000000000000000000006" as Address, decimals: 18, symbol: "WETH" },
-  },
-  [polygon.id]: {
-    ETH: { address: "0x0000000000000000000000000000000000000000" as Address, decimals: 18, symbol: "ETH" },
-    USDC: { address: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359" as Address, decimals: 6, symbol: "USDC" },
-    USDT: { address: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F" as Address, decimals: 6, symbol: "USDT" },
-    WETH: { address: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619" as Address, decimals: 18, symbol: "WETH" },
-  },
-};
 
 const CHAINS = [
   { id: base.id, name: "Base", url: "base" },
@@ -64,40 +18,8 @@ export default function Home() {
   const { switchChain } = useSwitchChain();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-  const [fromToken, setFromToken] = useState("ETH");
-  const [toToken, setToToken] = useState("USDC");
-  const [fromAmount, setFromAmount] = useState("");
-  const [toAmount, setToAmount] = useState("");
   const [selectedChain, setSelectedChain] = useState(CHAINS[0]);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isLoadingQuote, setIsLoadingQuote] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const { writeContract, data: hash, isPending } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
-
-  // Get available tokens for current chain
-  const availableTokens = useMemo(() => {
-    return TOKEN_INFO[selectedChain.id] || TOKEN_INFO[base.id];
-  }, [selectedChain.id]);
-
-  const fromTokenInfo = availableTokens[fromToken];
-  const toTokenInfo = availableTokens[toToken];
-  const isNativeToken = fromTokenInfo?.address === "0x0000000000000000000000000000000000000000";
-
-  // Check balance
-  const { data: balance } = useBalance({
-    address: isConnected ? address : undefined,
-    token: !isNativeToken && fromTokenInfo?.address ? fromTokenInfo.address : undefined,
-  });
-
-  // Check token allowance
-  const { data: allowance } = useReadContract({
-    address: !isNativeToken && isConnected && address && fromTokenInfo?.address ? fromTokenInfo.address : undefined,
-    abi: erc20Abi,
-    functionName: "allowance",
-    args: address && fromTokenInfo?.address ? [address, UNIVERSAL_ROUTER[selectedChain.id]] : undefined,
-  });
 
   // Load dark mode preference
   useEffect(() => {
@@ -120,124 +42,6 @@ export default function Home() {
     }
   }, [chainId]);
 
-  // Fetch quote from Uniswap API
-  useEffect(() => {
-    const fetchQuote = async () => {
-      if (!fromAmount || parseFloat(fromAmount) <= 0 || !fromToken || !toToken) {
-        setToAmount("");
-        return;
-      }
-
-      setIsLoadingQuote(true);
-      setError(null);
-      try {
-        // Fetch real quote from Uniswap API
-        const fromAddress = fromTokenInfo?.address === "0x0000000000000000000000000000000000000000" 
-          ? "ETH" 
-          : fromTokenInfo?.address.toLowerCase();
-        const toAddress = toTokenInfo?.address === "0x0000000000000000000000000000000000000000" 
-          ? "ETH" 
-          : toTokenInfo?.address.toLowerCase();
-
-        // Use Uniswap API to get quote
-        const response = await fetch(
-          `https://api.uniswap.org/v1/quote?tokenInAddress=${fromAddress}&tokenInChainId=${selectedChain.id}&tokenOutAddress=${toAddress}&tokenOutChainId=${selectedChain.id}&amount=${parseUnits(fromAmount, fromTokenInfo?.decimals || 18).toString()}&type=exactIn&protocols=v3`
-        );
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.quote) {
-            const quoteAmount = BigInt(data.quote);
-            const formatted = Number(quoteAmount) / Math.pow(10, toTokenInfo?.decimals || 18);
-            setToAmount(formatted.toFixed(6));
-          } else {
-            // Fallback to approximate rate
-            const rate = fromToken === "ETH" && toToken === "USDC" ? 2500 : 
-                         fromToken === "USDC" && toToken === "ETH" ? 0.0004 : 1;
-            setToAmount((parseFloat(fromAmount) * rate).toFixed(6));
-          }
-        } else {
-          // Fallback to approximate rate
-          const rate = fromToken === "ETH" && toToken === "USDC" ? 2500 : 
-                       fromToken === "USDC" && toToken === "ETH" ? 0.0004 : 1;
-          setToAmount((parseFloat(fromAmount) * rate).toFixed(6));
-        }
-      } catch (error) {
-        console.error("Error fetching quote:", error);
-        // Fallback to approximate rate
-        const rate = fromToken === "ETH" && toToken === "USDC" ? 2500 : 
-                     fromToken === "USDC" && toToken === "ETH" ? 0.0004 : 1;
-        setToAmount((parseFloat(fromAmount) * rate).toFixed(6));
-      } finally {
-        setIsLoadingQuote(false);
-      }
-    };
-
-    const timeoutId = setTimeout(fetchQuote, 500);
-    return () => clearTimeout(timeoutId);
-  }, [fromAmount, fromToken, toToken, fromTokenInfo, toTokenInfo, selectedChain.id]);
-
-  const handleApprove = async () => {
-    if (!isConnected || !fromTokenInfo || !address || isNativeToken) return;
-
-    try {
-      setError(null);
-      writeContract({
-        address: fromTokenInfo.address,
-        abi: erc20Abi,
-        functionName: "approve",
-        args: [UNIVERSAL_ROUTER[selectedChain.id], maxUint256],
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Approval failed");
-    }
-  };
-
-  const handleSwap = async () => {
-    if (!isConnected) {
-      connect({ connector: connectors[0] });
-      return;
-    }
-
-    if (!fromAmount || parseFloat(fromAmount) <= 0) {
-      setError("Please enter an amount");
-      return;
-    }
-
-    if (chainId !== selectedChain.id) {
-      switchChain({ chainId: selectedChain.id });
-      return;
-    }
-
-    // Check balance
-    if (balance && parseFloat(fromAmount) > parseFloat(balance.formatted)) {
-      setError("Insufficient balance");
-      return;
-    }
-
-    setError(null);
-
-    // Open Uniswap with pre-filled parameters for actual swap execution
-    // Note: Direct swap execution requires complex routing logic
-    // For production, use Uniswap SDK to build and execute swap transactions
-    const fromAddress = fromTokenInfo?.address === "0x0000000000000000000000000000000000000000" 
-      ? "ETH" 
-      : fromTokenInfo?.address;
-    const toAddress = toTokenInfo?.address === "0x0000000000000000000000000000000000000000" 
-      ? "ETH" 
-      : toTokenInfo?.address;
-    const uniswapUrl = `https://app.uniswap.org/swap?chain=${selectedChain.url}&inputCurrency=${fromAddress}&outputCurrency=${toAddress}&amount=${fromAmount}`;
-    window.open(uniswapUrl, "_blank");
-  };
-
-  const swapTokens = () => {
-    const temp = fromToken;
-    setFromToken(toToken);
-    setToToken(temp);
-    setFromAmount(toAmount);
-    setToAmount(fromAmount);
-  };
-
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
     setIsDarkMode(newDarkMode);
@@ -245,11 +49,8 @@ export default function Home() {
     document.documentElement.classList.toggle("dark", newDarkMode);
   };
 
-  const tokenOptions = Object.keys(availableTokens);
-  const needsTokenApproval = !isNativeToken && allowance !== undefined && fromAmount && 
-    parseFloat(fromAmount) > 0 && 
-    fromTokenInfo &&
-    allowance < parseUnits(fromAmount, fromTokenInfo.decimals);
+  // Build Uniswap Interface URL with current chain and theme
+  const uniswapUrl = `https://app.uniswap.org/swap?chain=${selectedChain.url}&theme=${isDarkMode ? "dark" : "light"}`;
 
   return (
     <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>
@@ -293,7 +94,12 @@ export default function Home() {
           value={selectedChain.id}
           onChange={(e) => {
             const chain = CHAINS.find((c) => c.id === Number(e.target.value));
-            if (chain) setSelectedChain(chain);
+            if (chain) {
+              setSelectedChain(chain);
+              if (isConnected && chainId !== chain.id) {
+                switchChain({ chainId: chain.id });
+              }
+            }
           }}
           className={styles.chainSelect}
         >
@@ -305,112 +111,16 @@ export default function Home() {
         </select>
       </div>
 
-      {/* Swap Card */}
-      <div className={styles.swapCard}>
-        <div className={styles.inputSection}>
-          <div className={styles.labelRow}>
-            <label className={styles.label}>From</label>
-            {balance && (
-              <span className={styles.balance}>
-                Balance: {parseFloat(balance.formatted).toFixed(4)} {fromToken}
-              </span>
-            )}
-          </div>
-          <div className={styles.tokenInput}>
-            <input
-              type="number"
-              placeholder="0.0"
-              value={fromAmount}
-              onChange={(e) => setFromAmount(e.target.value)}
-              className={styles.amountInput}
-              step="any"
-            />
-            <select
-              value={fromToken}
-              onChange={(e) => setFromToken(e.target.value)}
-              className={styles.tokenSelect}
-            >
-              {tokenOptions.map((token) => (
-                <option key={token} value={token}>
-                  {token}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <button onClick={swapTokens} className={styles.swapButton} title="Swap tokens">
-          ⇅
-        </button>
-
-        <div className={styles.inputSection}>
-          <label className={styles.label}>To</label>
-          <div className={styles.tokenInput}>
-            <input
-              type="text"
-              placeholder="0.0"
-              value={isLoadingQuote ? "Loading..." : toAmount}
-              readOnly
-              className={styles.amountInput}
-            />
-            <select
-              value={toToken}
-              onChange={(e) => setToToken(e.target.value)}
-              className={styles.tokenSelect}
-            >
-              {tokenOptions.map((token) => (
-                <option key={token} value={token}>
-                  {token}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {error && <div className={styles.errorBox}>{error}</div>}
-
-        {needsTokenApproval && isConnected && (
-          <button
-            onClick={handleApprove}
-            disabled={isPending}
-            className={styles.approveButton}
-          >
-            {isPending ? "Approving..." : `Approve ${fromToken}`}
-          </button>
-        )}
-
-        <button
-          onClick={handleSwap}
-          disabled={!fromAmount || parseFloat(fromAmount) <= 0 || isLoadingQuote || isPending || isConfirming}
-          className={styles.swapActionButton}
-        >
-          {!isConnected 
-            ? "Connect Wallet to Swap" 
-            : chainId !== selectedChain.id 
-            ? `Switch to ${selectedChain.name}` 
-            : isPending || isConfirming
-            ? "Processing..."
-            : "Swap on Uniswap"}
-        </button>
-
-        {isSuccess && hash && (
-          <div className={styles.successBox}>
-            <p>✅ Transaction submitted!</p>
-            <a
-              href={`https://basescan.org/tx/${hash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.link}
-            >
-              View on Explorer
-            </a>
-          </div>
-        )}
-
-        <div className={styles.infoBox}>
-          <p>💡 This will open Uniswap in a new tab to complete your swap</p>
-          <p>🔗 <a href={`https://app.uniswap.org/swap?chain=${selectedChain.url}`} target="_blank" rel="noopener noreferrer" className={styles.link}>Visit Uniswap directly</a></p>
-        </div>
+      {/* Uniswap Interface Embed - Similar to DexScreener */}
+      <div className={styles.uniswapContainer}>
+        <iframe
+          key={`${selectedChain.url}-${isDarkMode}`}
+          src={uniswapUrl}
+          className={styles.uniswapIframe}
+          title="Uniswap Swap Interface"
+          allow="clipboard-read; clipboard-write; payment"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"
+        />
       </div>
     </div>
   );

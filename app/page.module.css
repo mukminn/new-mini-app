@@ -154,213 +154,24 @@
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-.swapCard {
-  max-width: 500px;
+.uniswapContainer {
   width: 100%;
+  max-width: 600px;
   margin: 0 auto;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  height: 700px;
   border-radius: 24px;
-  padding: 2rem;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
 }
 
-.inputSection {
-  margin-bottom: 1.5rem;
-}
-
-.label {
+.uniswapIframe {
+  width: 100%;
+  height: 100%;
+  border: none;
   display: block;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.labelRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.balance {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-}
-
-.balance:hover {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.tokenInput {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  padding: 1rem;
-  transition: all 0.3s ease;
-}
-
-.tokenInput:focus-within {
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.amountInput {
-  flex: 1;
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  font-weight: 600;
-  outline: none;
-}
-
-.amountInput::placeholder {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-.tokenSelect {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  color: white;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  outline: none;
-}
-
-.tokenSelect:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.swapButton {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-}
-
-.swapButton:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: rotate(180deg) scale(1.1);
-}
-
-.swapActionButton {
-  width: 100%;
-  background: #f7d954;
-  color: #000;
-  border: none;
-  padding: 1rem 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 1rem;
-  box-shadow: 0 4px 20px rgba(247, 217, 84, 0.3);
-}
-
-.swapActionButton:hover:not(:disabled) {
-  background: #f5d73a;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(247, 217, 84, 0.4);
-}
-
-.swapActionButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.approveButton {
-  width: 100%;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 1rem;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
-}
-
-.approveButton:hover:not(:disabled) {
-  background: #2563eb;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4);
-}
-
-.approveButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.errorBox {
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #ef4444;
-  padding: 1rem;
-  border-radius: 12px;
-  margin-top: 1rem;
-  font-size: 0.875rem;
-}
-
-.successBox {
-  background: rgba(34, 197, 94, 0.2);
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  color: #22c55e;
-  padding: 1rem;
-  border-radius: 12px;
-  margin-top: 1rem;
-  font-size: 0.875rem;
-}
-
-.successBox p {
-  margin: 0.5rem 0;
-}
-
-.infoBox {
-  background: rgba(59, 130, 246, 0.2);
-  border: 1px solid rgba(59, 130, 246, 0.4);
-  color: #3b82f6;
-  padding: 1rem;
-  border-radius: 12px;
-  margin-top: 1rem;
-  font-size: 0.875rem;
-}
-
-.infoBox p {
-  margin: 0.5rem 0;
-}
-
-.link {
-  color: #f7d954;
-  text-decoration: underline;
-  transition: color 0.3s ease;
-}
-
-.link:hover {
-  color: #f5d73a;
 }
 
 /* Dark Mode */
