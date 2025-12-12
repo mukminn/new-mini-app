@@ -17,7 +17,7 @@ export async function GET() {
       },
     });
   } catch {
-    // Return a valid manifest structure even on error
+    // Return a valid manifest structure even on error (following Base documentation)
     const fallbackManifest = {
       accountAssociation: {
         header: "",
@@ -25,21 +25,30 @@ export async function GET() {
         signature: ""
       },
       miniapp: {
+        // Identity & Launch (Required)
         version: "1",
         name: "Swap Tokens",
-        description: "Trade any token on any chain - Powered by Uniswap",
+        homeUrl: "https://ber4mins.vercel.app",
         iconUrl: "https://ber4mins.vercel.app/blue-icon.png",
+        
+        // Loading Experience (Required)
         splashImageUrl: "https://ber4mins.vercel.app/blue-hero.png",
         splashBackgroundColor: "#000000",
-        homeUrl: "https://ber4mins.vercel.app",
-        subtitle: "Trade Any Token on Any Chain",
-        screenshotUrls: ["https://ber4mins.vercel.app/screenshot-portrait.png"],
-        heroImageUrl: "https://ber4mins.vercel.app/blue-hero.png",
-        tagline: "Swap any token on any chain",
-        webhookUrl: "https://ber4mins.vercel.app/api/webhook",
+        
+        // Discovery & Search (Required)
         primaryCategory: "finance",
         tags: ["swap", "trading", "defi", "uniswap", "tokens"],
-        ogTitle: "Swap Tokens - Trade Any Token on Any Chain",
+        noindex: false,
+        
+        // Display Information
+        subtitle: "Trade Any Token",
+        description: "Trade any token on any chain - Powered by Uniswap",
+        tagline: "Swap instantly",
+        heroImageUrl: "https://ber4mins.vercel.app/blue-hero.png",
+        screenshotUrls: ["https://ber4mins.vercel.app/screenshot-portrait.png"],
+        
+        // Embeds & Social Sharing
+        ogTitle: "Swap Tokens",
         ogDescription: "Trade any token on any chain - Powered by Uniswap",
         ogImageUrl: "https://ber4mins.vercel.app/blue-hero.png",
       }
