@@ -7,8 +7,17 @@ import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: minikitConfig.miniapp.name,
-    description: minikitConfig.miniapp.description,
+    title: minikitConfig.miniapp.ogTitle || minikitConfig.miniapp.name,
+    description: minikitConfig.miniapp.ogDescription || minikitConfig.miniapp.description,
+    openGraph: {
+      title: minikitConfig.miniapp.ogTitle || minikitConfig.miniapp.name,
+      description: minikitConfig.miniapp.ogDescription || minikitConfig.miniapp.description,
+      images: minikitConfig.miniapp.ogImageUrl ? [minikitConfig.miniapp.ogImageUrl] : [],
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
     other: {
       "fc:frame": JSON.stringify({
         version: minikitConfig.miniapp.version,
