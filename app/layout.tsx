@@ -11,12 +11,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const ogImageUrl = minikitConfig.miniapp.ogImageUrl || minikitConfig.miniapp.heroImageUrl;
   const homeUrl = minikitConfig.miniapp.homeUrl;
 
-  // Ensure metadataBase is a valid URL
+  // Use default URL for metadataBase
+  const DEFAULT_URL = "https://ber4mins.vercel.app";
   let metadataBase: URL;
   try {
-    metadataBase = new URL(homeUrl);
+    metadataBase = new URL(homeUrl || DEFAULT_URL);
   } catch {
-    metadataBase = new URL("https://ber4mins.vercel.app");
+    metadataBase = new URL(DEFAULT_URL);
   }
 
   return {

@@ -14,7 +14,7 @@ export default function Success() {
       
       const result = await composeCastAsync({
         text: text,
-        embeds: [process.env.NEXT_PUBLIC_URL || ""]
+        embeds: ["https://ber4mins.vercel.app"]
       });
 
       // result.cast can be null if user cancels

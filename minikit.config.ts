@@ -1,23 +1,5 @@
-// Get the root URL - use default production URL
-const getRootUrl = () => {
-  // Default production URL
-  const DEFAULT_URL = 'https://ber4mins.vercel.app';
-  
-  // In production, prefer NEXT_PUBLIC_URL if set
-  if (process.env.NEXT_PUBLIC_URL) {
-    return process.env.NEXT_PUBLIC_URL.replace(/\/$/, ''); // Remove trailing slash
-  }
-  
-  // Fallback to Vercel URL if available
-  if (process.env.VERCEL_URL && process.env.VERCEL_ENV === 'production') {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  
-  // Use default production URL
-  return DEFAULT_URL;
-};
-
-const ROOT_URL = getRootUrl();
+// Default production URL - always use this
+const ROOT_URL = 'https://ber4mins.vercel.app';
 
 /**
  * MiniApp configuration object. Must follow the Farcaster MiniApp specification.
