@@ -19,12 +19,12 @@ export default function Success() {
 
       // result.cast can be null if user cancels
       if (result?.cast) {
-        console.log("Cast created successfully:", result.cast.hash);
+        // Cast created successfully
       } else {
-        console.log("User cancelled the cast");
+        // User cancelled the cast
       }
-    } catch (error) {
-      console.error("Error sharing cast:", error);
+    } catch {
+      // Error sharing cast - silently handle
     }
   };
 

@@ -6,24 +6,61 @@ import { RootProvider } from "./rootProvider";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const ogTitle = minikitConfig.miniapp.ogTitle || minikitConfig.miniapp.name;
+  const ogDescription = minikitConfig.miniapp.ogDescription || minikitConfig.miniapp.description;
+  const ogImageUrl = minikitConfig.miniapp.ogImageUrl || minikitConfig.miniapp.heroImageUrl;
+  const homeUrl = minikitConfig.miniapp.homeUrl;
+
+  // Ensure metadataBase is a valid URL
+  let metadataBase: URL;
+  try {
+    metadataBase = new URL(homeUrl);
+  } catch {
+    metadataBase = new URL("https://ber4mins.vercel.app");
+  }
+
   return {
-    title: minikitConfig.miniapp.ogTitle || minikitConfig.miniapp.name,
-    description: minikitConfig.miniapp.ogDescription || minikitConfig.miniapp.description,
+    metadataBase,
+    title: ogTitle,
+    description: ogDescription,
     openGraph: {
-      title: minikitConfig.miniapp.ogTitle || minikitConfig.miniapp.name,
-      description: minikitConfig.miniapp.ogDescription || minikitConfig.miniapp.description,
-      images: minikitConfig.miniapp.ogImageUrl ? [minikitConfig.miniapp.ogImageUrl] : [],
+      type: "website",
+      url: homeUrl,
+      title: ogTitle,
+      description: ogDescription,
+      siteName: minikitConfig.miniapp.name,
+      images: ogImageUrl ? [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: ogTitle,
+        }
+      ] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description: ogDescription,
+      images: ogImageUrl ? [ogImageUrl] : [],
     },
     robots: {
       index: true,
       follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
     other: {
       "fc:frame": JSON.stringify({
         version: minikitConfig.miniapp.version,
         imageUrl: minikitConfig.miniapp.heroImageUrl,
         button: {
-          title: `Join the ${minikitConfig.miniapp.name} Waitlist`,
+          title: `Launch ${minikitConfig.miniapp.name}`,
           action: {
             name: `Launch ${minikitConfig.miniapp.name}`,
             type: "launch_frame",

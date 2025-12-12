@@ -11,8 +11,8 @@ function getUrlHost(request: NextRequest): string {
     try {
       const url = new URL(origin);
       return url.host;
-    } catch (error) {
-      console.warn("Invalid origin header:", origin, error);
+    } catch {
+      // Invalid origin header - fallback to host header
     }
   }
 
@@ -54,8 +54,6 @@ export async function GET(request: NextRequest) {
       token: authorization.split(" ")[1] as string,
       domain: getUrlHost(request),
     });
-
-    console.log("payload", payload);
 
     // If the token was valid, `payload.sub` will be the user's Farcaster ID.
     const userFid = payload.sub;
