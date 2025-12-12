@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain, useWriteContract, useWaitForTransactionReceipt, useReadContract, useBalance } from "wagmi";
 import { base, mainnet, arbitrum, optimism, polygon } from "wagmi/chains";
-import { parseUnits, Address, maxUint256, encodeFunctionData } from "viem";
+import { parseUnits, Address, maxUint256 } from "viem";
 import { erc20Abi } from "viem";
 import styles from "./page.module.css";
 
