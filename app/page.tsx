@@ -86,11 +86,10 @@ export default function Home() {
   const needsApproval = fromTokenInfo && fromTokenInfo.address !== "0x0000000000000000000000000000000000000000";
 
   const { data: allowance } = useReadContract({
-    address: fromTokenInfo?.address,
+    address: needsApproval && isConnected && address && fromTokenInfo?.address ? fromTokenInfo.address : undefined,
     abi: erc20Abi,
     functionName: "allowance",
     args: address && fromTokenInfo?.address ? [address, UNIVERSAL_ROUTER[selectedChain.id]] : undefined,
-    enabled: needsApproval && isConnected && !!address && !!fromTokenInfo?.address,
   });
 
   // Load dark mode preference
