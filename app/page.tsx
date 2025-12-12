@@ -1,24 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain } from "wagmi";
-import { base, mainnet, arbitrum, optimism, polygon } from "wagmi/chains";
 import styles from "./page.module.css";
 
-const CHAINS = [
-  { id: base.id, name: "Base", url: "base" },
-  { id: mainnet.id, name: "Ethereum", url: "ethereum" },
-  { id: arbitrum.id, name: "Arbitrum", url: "arbitrum" },
-  { id: optimism.id, name: "Optimism", url: "optimism" },
-  { id: polygon.id, name: "Polygon", url: "polygon" },
-];
-
 export default function Home() {
-  const { address, isConnected } = useAccount();
-  const chainId = useChainId();
-  const { switchChain } = useSwitchChain();
-  const { connect, connectors } = useConnect();
-  const { disconnect } = useDisconnect();
-  const [selectedChain, setSelectedChain] = useState(CHAINS[0]);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Load dark mode preference
@@ -34,14 +18,6 @@ export default function Home() {
     }
   }, []);
 
-  // Update selected chain based on connected chain
-  useEffect(() => {
-    const currentChain = CHAINS.find((c) => c.id === chainId);
-    if (currentChain) {
-      setSelectedChain(currentChain);
-    }
-  }, [chainId]);
-
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
     setIsDarkMode(newDarkMode);
@@ -49,8 +25,8 @@ export default function Home() {
     document.documentElement.classList.toggle("dark", newDarkMode);
   };
 
-  // Build Uniswap Interface URL with current chain and theme
-  const uniswapUrl = `https://app.uniswap.org/swap?chain=${selectedChain.url}&theme=${isDarkMode ? "dark" : "light"}`;
+  // Build Uniswap Interface URL with theme
+  const uniswapUrl = `https://app.uniswap.org/swap?theme=${isDarkMode ? "dark" : "light"}`;
 
   return (
     <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>
@@ -58,24 +34,6 @@ export default function Home() {
       <div className={styles.header}>
         <h1 className={styles.title}>Swap Tokens</h1>
         <p className={styles.subtitle}>Trade any token on any chain - Powered by Uniswap</p>
-      </div>
-
-      {/* Wallet Section */}
-      <div className={styles.walletSection}>
-        {!isConnected ? (
-          <button onClick={() => connect({ connector: connectors[0] })} className={styles.connectButton}>
-            Connect Wallet
-          </button>
-        ) : (
-          <>
-            <div className={styles.walletInfo}>
-              <p>{address?.slice(0, 6)}...{address?.slice(-4)}</p>
-            </div>
-            <button onClick={() => disconnect()} className={styles.disconnectButton}>
-              Disconnect
-            </button>
-          </>
-        )}
       </div>
 
       {/* Dark Mode Toggle */}
@@ -87,34 +45,10 @@ export default function Home() {
         {isDarkMode ? "☀️" : "🌙"}
       </button>
 
-      {/* Chain Selection */}
-      <div className={styles.chainSection}>
-        <label className={styles.chainLabel}>Select Network</label>
-        <select
-          value={selectedChain.id}
-          onChange={(e) => {
-            const chain = CHAINS.find((c) => c.id === Number(e.target.value));
-            if (chain) {
-              setSelectedChain(chain);
-              if (isConnected && chainId !== chain.id) {
-                switchChain({ chainId: chain.id });
-              }
-            }
-          }}
-          className={styles.chainSelect}
-        >
-          {CHAINS.map((chain) => (
-            <option key={chain.id} value={chain.id}>
-              {chain.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Uniswap Interface Embed - Similar to DexScreener */}
+      {/* Uniswap Interface Embed */}
       <div className={styles.uniswapContainer}>
         <iframe
-          key={`${selectedChain.url}-${isDarkMode}`}
+          key={isDarkMode}
           src={uniswapUrl}
           className={styles.uniswapIframe}
           title="Uniswap Swap Interface"
