@@ -1,6 +1,20 @@
-const ROOT_URL =
-  process.env.NEXT_PUBLIC_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:3000');
+// Get the root URL from environment variables or Vercel
+const getRootUrl = () => {
+  // In production, prefer NEXT_PUBLIC_URL
+  if (process.env.NEXT_PUBLIC_URL) {
+    return process.env.NEXT_PUBLIC_URL.replace(/\/$/, ''); // Remove trailing slash
+  }
+  
+  // Fallback to Vercel URL
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  // Development fallback
+  return 'http://localhost:3000';
+};
+
+const ROOT_URL = getRootUrl();
 
 /**
  * MiniApp configuration object. Must follow the Farcaster MiniApp specification.
