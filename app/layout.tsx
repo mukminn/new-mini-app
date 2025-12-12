@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const homeUrl = minikitConfig.miniapp.homeUrl;
 
   // Use default URL for metadataBase
-  const DEFAULT_URL = "https://ber4mins.vercel.app";
+  const DEFAULT_URL = "https://new-mini-app-delta.vercel.app";
   let metadataBase: URL;
   try {
     metadataBase = new URL(homeUrl || DEFAULT_URL);

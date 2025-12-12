@@ -23,7 +23,7 @@ function getUrlHost(request: NextRequest): string {
   }
 
   // Final fallback to default URL
-  const DEFAULT_URL = "https://ber4mins.vercel.app";
+  const DEFAULT_URL = "https://new-mini-app-delta.vercel.app";
   const url = new URL(DEFAULT_URL);
   return url.host;
 }

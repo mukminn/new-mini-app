@@ -1,5 +1,5 @@
 // Default production URL - always use this
-const ROOT_URL = 'https://ber4mins.vercel.app';
+const ROOT_URL = 'https://new-mini-app-delta.vercel.app';
 
 /**
  * MiniApp configuration object. Must follow the Farcaster MiniApp specification.

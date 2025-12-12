@@ -28,11 +28,11 @@ export async function GET() {
         // Identity & Launch (Required)
         version: "1",
         name: "Swap Tokens",
-        homeUrl: "https://ber4mins.vercel.app",
-        iconUrl: "https://ber4mins.vercel.app/blue-icon.png",
+        homeUrl: "https://new-mini-app-delta.vercel.app",
+        iconUrl: "https://new-mini-app-delta.vercel.app/blue-icon.png",
         
         // Loading Experience (Required)
-        splashImageUrl: "https://ber4mins.vercel.app/blue-hero.png",
+        splashImageUrl: "https://new-mini-app-delta.vercel.app/blue-hero.png",
         splashBackgroundColor: "#000000",
         
         // Discovery & Search (Required)
@@ -44,13 +44,13 @@ export async function GET() {
         subtitle: "Trade Any Token",
         description: "Trade any token on any chain - Powered by Uniswap",
         tagline: "Swap instantly",
-        heroImageUrl: "https://ber4mins.vercel.app/blue-hero.png",
-        screenshotUrls: ["https://ber4mins.vercel.app/screenshot-portrait.png"],
+        heroImageUrl: "https://new-mini-app-delta.vercel.app/blue-hero.png",
+        screenshotUrls: ["https://new-mini-app-delta.vercel.app/screenshot-portrait.png"],
         
         // Embeds & Social Sharing
         ogTitle: "Swap Tokens",
         ogDescription: "Trade any token on any chain - Powered by Uniswap",
-        ogImageUrl: "https://ber4mins.vercel.app/blue-hero.png",
+        ogImageUrl: "https://new-mini-app-delta.vercel.app/blue-hero.png",
       }
     };
     
