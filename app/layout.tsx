@@ -53,7 +53,15 @@ export default function RootLayout({
     <RootProvider>
       <html lang="en" suppressHydrationWarning>
         <head>
-          <meta name="vercel-toolbar" content="false" />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                if (typeof window !== 'undefined') {
+                  window.__VERCEL_TOOLBAR__ = false;
+                }
+              `,
+            }}
+          />
         </head>
         <body className={`${inter.variable} ${sourceCodePro.variable}`}>
           <SafeArea>{children}</SafeArea>
