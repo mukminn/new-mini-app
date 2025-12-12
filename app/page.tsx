@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { base, mainnet, arbitrum, optimism, polygon } from "wagmi/chains";
-import { parseUnits, formatUnits, Address, maxUint256 } from "viem";
+import { parseUnits, Address, maxUint256 } from "viem";
 import { erc20Abi } from "viem";
 import styles from "./page.module.css";
 
@@ -73,7 +73,7 @@ export default function Home() {
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { writeContract, data: hash, isPending, error: writeError } = useWriteContract();
+  const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
   // Get available tokens for current chain
