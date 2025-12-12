@@ -48,7 +48,7 @@ export default function Home() {
       {/* Uniswap Interface Embed */}
       <div className={styles.uniswapContainer}>
         <iframe
-          key={isDarkMode}
+          key={isDarkMode ? "dark" : "light"}
           src={uniswapUrl}
           className={styles.uniswapIframe}
           title="Uniswap Swap Interface"
